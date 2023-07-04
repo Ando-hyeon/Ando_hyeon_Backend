@@ -54,15 +54,15 @@ class Post(
     @JoinColumn(name = "file_id", nullable = true)
     val file: File? = null
 
-    @Column(name = "")
+    @Column(name = "region")
     val region: String = region
 
     fun toMinimumPostResponse(): MinimumPostResponse {
-        return MinimumPostResponse()
+        return MinimumPostResponse(this.title)
     }
 
     fun toMaximumPostResponse(): MaximumPostResponse {
-        return MaximumPostResponse()
+        return MaximumPostResponse(this.title)
     }
 
     fun edit(request: EditPostRequest) {

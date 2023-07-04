@@ -10,8 +10,10 @@ import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.Maxi
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MinimumPostResponse
 import com.example.ando_hyeon_backend.global.exception.data.BusinessException
 import com.example.ando_hyeon_backend.global.exception.data.ErrorCode
+import com.example.ando_hyeon_backend.infra.clova.ClovaService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,10 +21,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class PostServiceImpl(
-    private val postRepository: PostRepository
+    private val postRepository: PostRepository,
+    private val clovaService: ClovaService
 ): PostService {
 
-    override fun getPostList(idx: Int, size: Int): Page<MinimumPostResponse> {
+    override fun getPostList(idx: Int, size: Int, type: PostType): Page<MinimumPostResponse> {
         return postRepository.findAll(PageRequest.of(idx, size)).map {
             it.toMinimumPostResponse()
         }
@@ -34,29 +37,36 @@ class PostServiceImpl(
     }
 
     @Transactional
-    override fun createPost(request: CreatePostRequest, user: User) {
+    override fun createPost(request: CreatePostRequest, user: UserDetails) {
+        val clovaSummary = clovaService.extractContent(request.title, request.content)
+            ?: request.title
+
+        val statement = clovaService.extractStatement(clovaSummary)?: throw BusinessException(errorCode = ErrorCode.UNDEFINED_ERROR)
 
         postRepository.save(
             Post(
                 request.title,
-                user,
+                user as User,
                 request.content,
-                request.shortContent,
-                PostType.USER
-                
+                clovaSummary,
+                PostType.USER,
+                (statement.negative * 100).toInt(),
+                (statement.positive * 100).toInt(),
+                (statement.neutral * 100).toInt(),
+                request.region
             )
         )
     }
 
     @Transactional
-    override fun editPost(request: EditPostRequest, id: Long, user: User) {
+    override fun editPost(request: EditPostRequest, id: Long, user: UserDetails) {
         val post = postRepository.findById(id).orElse(null)?: throw BusinessException(errorCode = ErrorCode.PERSISTENCE_DATA_NOT_FOUND_ERROR)
         post.edit(request)
         postRepository.save(post)
     }
 
     @Transactional
-    override fun deletePost(id: Long, user: User) {
+    override fun deletePost(id: Long, user: UserDetails) {
         postRepository.deleteById(id)
     }
 }

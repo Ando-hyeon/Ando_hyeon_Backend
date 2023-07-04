@@ -1,6 +1,11 @@
 package com.example.ando_hyeon_backend.infra.clova
 
+import com.example.ando_hyeon_backend.global.exception.data.BusinessException
+import com.example.ando_hyeon_backend.global.exception.data.ErrorCode
 import com.example.ando_hyeon_backend.global.util.textParsing.ContentTextParsingUtil
+import com.example.ando_hyeon_backend.infra.clova.data.ClovaStatementRequest
+import com.example.ando_hyeon_backend.infra.clova.data.ClovaStatementResponse
+import com.example.ando_hyeon_backend.infra.clova.data.Confidence
 import com.example.ando_hyeon_backend.infra.clova.env.NCloudProperty
 import com.example.ando_hyeon_backend.infra.ncloud.clova.data.ClovaSummaryRequset
 import com.example.ando_hyeon_backend.infra.ncloud.clova.data.ClovaSummaryResponse
@@ -23,6 +28,7 @@ class ClovaServiceImpl(
 
     companion object {
         const val SUMMARY_URL = "https://naveropenapi.apigw.ntruss.com/text-summary/v1/summarize"
+        const val STATEMENT_URL = "https://naveropenapi.apigw.ntruss.com/sentiment-analysis/v1/analyze"
     }
 
     override fun extractContent(title: String, content: String): String? {
@@ -61,8 +67,29 @@ class ClovaServiceImpl(
         }
     }
 
-    override fun extractStatement(content: String): String? {
-        TODO("Not yet implemented")
+    override fun extractStatement(content: String): Confidence? {
+        var headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers["X-NCP-APIGW-API-KEY-ID"] = nCloudProperty.clientKey
+        headers["X-NCP-APIGW-API-KEY"] = nCloudProperty.secretKey
+
+
+        val request = ClovaStatementRequest(
+            content
+        )
+
+        val httpEntity = HttpEntity<ClovaStatementRequest>(request, headers)
+
+        try {
+            return restTemplate.exchange(
+                STATEMENT_URL,
+                HttpMethod.POST,
+                httpEntity,
+                ClovaStatementResponse::class.java
+            ).body?.document?.confidence?: throw BusinessException(errorCode = ErrorCode.UNDEFINED_ERROR)
+        } catch (e: HttpClientErrorException) {
+            return null
+        }
     }
 
 }
