@@ -38,6 +38,8 @@ dependencies {
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	//Jwts
+	implementation("io.jsonwebtoken:jjwt:0.9.1")
 }
 
 tasks.withType<KotlinCompile> {
