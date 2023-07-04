@@ -35,7 +35,7 @@ class Post(
     val shortContent: String = shortContent
 
     @ManyToOne
-    @JoinColumn(name = "writer_email")
+    @JoinColumn(name = "writer_email", nullable = true)
     val writer: User = writer
 
     @Enumerated(EnumType.STRING)
@@ -62,7 +62,14 @@ class Post(
     }
 
     fun toMaximumPostResponse(): MaximumPostResponse {
-        return MaximumPostResponse(this.title)
+        return MaximumPostResponse(
+            this.id!!,
+            this.title,
+            this.content,
+            this.shortContent,
+            this.writer.toUserResponse()
+
+        )
     }
 
     fun edit(request: EditPostRequest) {

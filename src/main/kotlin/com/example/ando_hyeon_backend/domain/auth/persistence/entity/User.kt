@@ -1,5 +1,6 @@
 package com.example.ando_hyeon_backend.domain.auth.persistence.entity
 
+import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.UserResponse
 import com.example.ando_hyeon_backend.global.entity.BaseEntity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -51,5 +52,11 @@ class User(
         return true
     }
 
+    fun toUserResponse(): UserResponse {
+        return UserResponse(
+            this.email,
+            this.name
+        )
+    }
 
 }
