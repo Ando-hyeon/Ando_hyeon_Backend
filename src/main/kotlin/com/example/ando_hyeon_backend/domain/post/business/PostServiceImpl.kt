@@ -8,9 +8,11 @@ import com.example.ando_hyeon_backend.domain.post.presentation.dto.request.Creat
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.request.EditPostRequest
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MaximumPostResponse
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MinimumPostResponse
+import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.UserResponse
 import com.example.ando_hyeon_backend.global.exception.data.BusinessException
 import com.example.ando_hyeon_backend.global.exception.data.ErrorCode
 import com.example.ando_hyeon_backend.infra.clova.ClovaService
+import com.example.ando_hyeon_backend.infra.naver.NaverService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.userdetails.UserDetails
@@ -22,18 +24,37 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class PostServiceImpl(
     private val postRepository: PostRepository,
-    private val clovaService: ClovaService
+    private val clovaService: ClovaService,
+    private val naverService: NaverService
 ): PostService {
 
-    override fun getPostList(idx: Int, size: Int, type: PostType): Page<MinimumPostResponse> {
-        return postRepository.findAll(PageRequest.of(idx, size)).map {
-            it.toMinimumPostResponse()
+    override fun getPostList(query: String, size: Int, type: PostType): List<MaximumPostResponse> {
+        if (type == PostType.USER) {
+            return postRepository.findAll(PageRequest.of(0, size)).map {
+                it.toMaximumPostResponse(null)
+            }.toList()
         }
-    }
+        else {
+            return naverService.getNewList(query, size).items.map {
+                val statement = clovaService.extractStatement(it.description)?: throw BusinessException(errorCode = ErrorCode.UNDEFINED_ERROR)
 
-    override fun getDetailPost(id: Long): MaximumPostResponse {
-        return (postRepository.findById(id).orElse(null)?: throw BusinessException(errorCode = ErrorCode.PERSISTENCE_DATA_NOT_FOUND_ERROR))
-            .toMaximumPostResponse()
+                return@map MaximumPostResponse(
+                    it.title,
+                    it.description,
+                    it.description,
+                    UserResponse(
+                        "naver",
+                        "news"
+                    ),
+                    PostType.NEWS,
+                    (statement.neutral).toInt(),
+                    (statement.negative).toInt(),
+                    (statement.positive).toInt(),
+                    query,
+                    it.originallink
+                )
+            }
+        }
     }
 
     @Transactional
@@ -50,9 +71,9 @@ class PostServiceImpl(
                 request.content,
                 clovaSummary,
                 PostType.USER,
-                (statement.negative * 100).toInt(),
-                (statement.positive * 100).toInt(),
-                (statement.neutral * 100).toInt(),
+                (statement.neutral).toInt(),
+                (statement.negative).toInt(),
+                (statement.positive).toInt(),
                 request.region
             )
         )

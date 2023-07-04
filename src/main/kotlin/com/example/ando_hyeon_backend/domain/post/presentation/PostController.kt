@@ -30,18 +30,11 @@ class PostController(
 
     @GetMapping("/list")
     fun getPostList(
-        @RequestParam("idx") idx: Int,
+        @RequestParam("region") region: String,
         @RequestParam("size") size: Int,
         @RequestParam("type") type: PostType
-    ): Page<MinimumPostResponse>{
-        return postService.getPostList(idx, size, type)
-    }
-
-    @GetMapping
-    fun getDetailPost(
-        @RequestParam("id") id: Long
-    ): MaximumPostResponse {
-        return postService.getDetailPost(id)
+    ): List<MaximumPostResponse>{
+        return postService.getPostList(region, size, type)
     }
 
     @PostMapping

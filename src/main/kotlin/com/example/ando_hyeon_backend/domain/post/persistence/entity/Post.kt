@@ -57,18 +57,18 @@ class Post(
     @Column(name = "region")
     val region: String = region
 
-    fun toMinimumPostResponse(): MinimumPostResponse {
-        return MinimumPostResponse(this.title)
-    }
-
-    fun toMaximumPostResponse(): MaximumPostResponse {
+    fun toMaximumPostResponse(referenceUrl: String?): MaximumPostResponse {
         return MaximumPostResponse(
-            this.id!!,
             this.title,
             this.content,
             this.shortContent,
-            this.writer.toUserResponse()
-
+            this.writer.toUserResponse(),
+            this.postType,
+            this.statementNeutral,
+            this.statementNegative,
+            this.statementPositive,
+            this.region,
+            referenceUrl
         )
     }
 

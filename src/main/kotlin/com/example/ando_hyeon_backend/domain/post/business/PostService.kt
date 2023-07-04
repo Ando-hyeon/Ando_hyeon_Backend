@@ -10,8 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails
 
 interface PostService {
 
-    fun getPostList(idx: Int, size: Int, type: PostType): Page<MinimumPostResponse>
-    fun getDetailPost(id: Long): MaximumPostResponse
+    fun getPostList(query: String, size: Int, type: PostType): List<MaximumPostResponse>
 
     fun createPost(request: CreatePostRequest, user: UserDetails)
     fun editPost(request: EditPostRequest, id: Long, user: UserDetails)

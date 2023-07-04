@@ -73,7 +73,6 @@ class ClovaServiceImpl(
         headers["X-NCP-APIGW-API-KEY-ID"] = nCloudProperty.clientKey
         headers["X-NCP-APIGW-API-KEY"] = nCloudProperty.secretKey
 
-
         val request = ClovaStatementRequest(
             content
         )
@@ -86,7 +85,7 @@ class ClovaServiceImpl(
                 HttpMethod.POST,
                 httpEntity,
                 ClovaStatementResponse::class.java
-            ).body?.document?.confidence?: throw BusinessException(errorCode = ErrorCode.UNDEFINED_ERROR)
+            ).body?.document?.confidence
         } catch (e: HttpClientErrorException) {
             return null
         }
