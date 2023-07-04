@@ -31,13 +31,6 @@ class TokenProvider(
                 .setIssuedAt(Date())
                 .setExpiration(Date(Date().time + (jwtProperty.accessExpiredAt * 1000)))
                 .compact()
-            ,
-            Jwts.builder()
-                .signWith(SignatureAlgorithm.HS256, jwtProperty.secretKey)
-                .claim("type", "refresh")
-                .setIssuedAt(Date())
-                .setExpiration(Date(Date().time + (jwtProperty.refreshExpiredAt * 1000)))
-                .compact()
         )
     }
 
