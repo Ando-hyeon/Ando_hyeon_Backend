@@ -40,6 +40,9 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	//Jwts
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
+	// Lombok
+	compileOnly("org.projectlombok:lombok")
+	annotationProcessor("org.projectlombok:lombok")
 }
 
 tasks.withType<KotlinCompile> {
