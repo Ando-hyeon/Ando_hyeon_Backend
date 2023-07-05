@@ -4,11 +4,10 @@ import com.example.ando_hyeon_backend.domain.post.business.PostService
 import com.example.ando_hyeon_backend.domain.post.persistence.entity.PostType
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.request.CreatePostRequest
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.request.EditPostRequest
+import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MaximumPostListResponse
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MaximumPostResponse
-import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MinimumPostResponse
 import com.example.ando_hyeon_backend.global.exception.data.BusinessException
 import com.example.ando_hyeon_backend.global.exception.data.ErrorCode
-import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -28,13 +27,22 @@ class PostController(
     private val postService: PostService
 ) {
 
+    @GetMapping("/me")
+    fun getMyPostList(
+        @AuthenticationPrincipal user: UserDetails?
+    ): MaximumPostListResponse {
+        return MaximumPostListResponse(
+            postService.getMyPostList(user?: throw BusinessException(errorCode = ErrorCode.NO_AUTHORIZATION_ERROR))
+        )
+    }
+
     @GetMapping("/list")
     fun getPostList(
         @RequestParam("region") region: String,
-        @RequestParam("size") size: Int,
+        @RequestParam("size", defaultValue = "10") size: Int,
         @RequestParam("type") type: PostType
-    ): List<MaximumPostResponse>{
-        return postService.getPostList(region, size, type)
+    ): MaximumPostListResponse {
+        return MaximumPostListResponse(postService.getPostList(region, size, type))
     }
 
     @PostMapping
@@ -50,19 +58,19 @@ class PostController(
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun editPost(
         @RequestBody request: EditPostRequest,
-        @RequestParam("id") id: Long,
+        @RequestParam("title") title: String,
         @AuthenticationPrincipal user: UserDetails?
     ){
-        postService.editPost(request, id, user?: throw BusinessException(errorCode = ErrorCode.NO_AUTHORIZATION_ERROR))
+        postService.editPost(request, title, user?: throw BusinessException(errorCode = ErrorCode.NO_AUTHORIZATION_ERROR))
     }
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deletePost(
-        @RequestParam id: Long,
+        @RequestParam title: String,
         @AuthenticationPrincipal user: UserDetails?
     ) {
-        postService.deletePost(id, user?: throw BusinessException(errorCode = ErrorCode.NO_AUTHORIZATION_ERROR))
+        postService.deletePost(title, user?: throw BusinessException(errorCode = ErrorCode.NO_AUTHORIZATION_ERROR))
     }
 
 }

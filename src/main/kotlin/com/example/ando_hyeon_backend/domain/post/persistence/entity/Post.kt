@@ -3,11 +3,11 @@ package com.example.ando_hyeon_backend.domain.post.persistence.entity
 import com.example.ando_hyeon_backend.domain.auth.persistence.entity.User
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.request.EditPostRequest
 import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MaximumPostResponse
-import com.example.ando_hyeon_backend.domain.post.presentation.dto.response.MinimumPostResponse
 import javax.persistence.*
 
 
 @Entity
+@Table(name = "post")
 class Post(
     title: String,
     writer: User,
@@ -17,7 +17,7 @@ class Post(
     statementNegative: Int,
     statementPositive: Int,
     statementNeutral: Int,
-    region: String
+    address: Address
 ){
 
     @Id
@@ -26,13 +26,13 @@ class Post(
     val id: Long? = null
 
     @Column(name = "title", nullable = false)
-    val title: String = title
+    var title: String = title
 
     @Column(name = "content", nullable = false)
-    val content: String = content
+    var content: String = content
 
     @Column(name = "short_content", nullable = false)
-    val shortContent: String = shortContent
+    var shortContent: String = shortContent
 
     @ManyToOne
     @JoinColumn(name = "writer_email", nullable = true)
@@ -50,12 +50,8 @@ class Post(
     @Column(name = "statement_positive", nullable = false)
     val statementPositive: Int = statementPositive
 
-    @OneToOne
-    @JoinColumn(name = "file_id", nullable = true)
-    val file: File? = null
-
-    @Column(name = "region")
-    val region: String = region
+    @Embedded
+    var address: Address = address
 
     fun toMaximumPostResponse(referenceUrl: String?): MaximumPostResponse {
         return MaximumPostResponse(
@@ -67,13 +63,18 @@ class Post(
             this.statementNeutral,
             this.statementNegative,
             this.statementPositive,
-            this.region,
+            this.address,
             referenceUrl
         )
     }
 
-    fun edit(request: EditPostRequest) {
-
+    fun edit(r: EditPostRequest) {
+        r.title?.let {
+            this.title = it
+        }
+        r.content?.let {
+            this.content = it
+        }
     }
 
 }

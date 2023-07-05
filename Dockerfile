@@ -1,8 +1,7 @@
-FROM openjdk:11-jdk as builder
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} /app.jar
+FROM eclipse-temurin:17-jdk-ubi9-minimal
+ARG JAR_FILE=build/libs/*SNAPSHOT.jar
 
-FROM openjdk:18-jdk
+COPY ${JAR_FILE} app.jar
 
-COPY --from=builder /app.jar /app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
+

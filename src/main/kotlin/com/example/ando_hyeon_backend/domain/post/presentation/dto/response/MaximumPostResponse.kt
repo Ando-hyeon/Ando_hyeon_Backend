@@ -1,5 +1,6 @@
 package com.example.ando_hyeon_backend.domain.post.presentation.dto.response
 
+import com.example.ando_hyeon_backend.domain.post.persistence.entity.Address
 import com.example.ando_hyeon_backend.domain.post.persistence.entity.PostType
 
 data class MaximumPostResponse (
@@ -11,6 +12,6 @@ data class MaximumPostResponse (
     val statementNeutral: Int,
     val statementNegative: Int,
     val statementPositive: Int,
-    val region: String,
+    val address: Address,
     val referenceUrl: String?
 )

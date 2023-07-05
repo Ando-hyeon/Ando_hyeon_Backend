@@ -21,6 +21,16 @@ configurations {
 	}
 }
 
+allOpen {
+	annotation("javax.persistence.Entity")
+	annotation("org.springframework.data.redis.core.RedisHash")
+}
+
+noArg {
+	annotation("javax.persistence.Entity")
+	annotation("org.springframework.data.redis.core.RedisHash")
+}
+
 repositories {
 	mavenCentral()
 	maven { url = uri("https://repo.spring.io/milestone") }
@@ -40,9 +50,6 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	//Jwts
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
-	// Lombok
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
 }
 
 tasks.withType<KotlinCompile> {
